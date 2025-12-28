@@ -5,43 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-import requests
 
-TG_BOT_TOKEN = ""
-TG_CHAT_ID = ""
-
-def tg_notify(title, message, success=True):
-    emoji = "✅" if success else "❌"
-    text = f"{emoji} *{title}*\n\n{message}"
-
-    url = f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage"
-    payload = {
-        "chat_id": TG_CHAT_ID,
-        "text": text,
-        "parse_mode": "Markdown"
-    }
-    try:
-        requests.post(url, data=payload, timeout=10)
-    except Exception as e:
-        print("Telegram 通知失败:", e)
-
-tg_notify(
-    "Zampto VPS 续期成功",
-    f"服务器 ID: {SERVER_ID}\n时间: {time.strftime('%Y-%m-%d %H:%M:%S')}",
-    success=True
-)
-
-tg_notify(
-    "Zampto VPS 续期失败",
-    f"服务器 ID: {SERVER_ID}\n原因: {str(e)}",
-    success=False
-)
-
-tg_notify(
-    "Zampto VPS 续期状态未知",
-    f"服务器 ID: {SERVER_ID}\n请手动检查控制台",
-    success=False
-)
 
 
 # ================= 配置区 =================
@@ -133,5 +97,6 @@ def run_task():
 
 if __name__ == "__main__":
     run_task()
+
 
 
