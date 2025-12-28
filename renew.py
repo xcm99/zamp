@@ -6,8 +6,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 # ================= 配置区 =================
-USERNAME = "moyz8800@outlook.com"
-PASSWORD = "mkDz66880"
+USERNAME = ""
+PASSWORD = ""
 SERVER_ID = "2190"
 
 LOGIN_URL = "https://auth.zampto.net/sign-in?app_id=bmhk6c8qdqxphlyscztgl"
@@ -94,3 +94,4 @@ def run_task():
 
 if __name__ == "__main__":
     run_task()
+
