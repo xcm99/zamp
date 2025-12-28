@@ -28,37 +28,42 @@ def main():
     s = requests.Session()
     s.cookies.set("PHPSESSID", PHPSESSID, domain=".zampto.net", path="/")
 
-    # 1️⃣ 执行 renew
-    r = s.get(RENEW_URL, headers=HEADERS, allow_redirects=False, timeout=15)
+        # 4️⃣ 打开 VPS 管理页
+        driver.get(VPS_MANAGE_URL)
 
-    if r.status_code in (301, 302):
-        loc = r.headers.get("Location", "")
-        if "sign-in" in loc:
-            fail("Session expired (redirected to login)")
+        # 5️⃣ 定位 Renew Server 按钮
+renew_btn = wait.until(
+    EC.presence_of_element_located(
+        (By.XPATH, "//a[contains(@onclick,'handleServerRenewal')]")
+    )
+)
 
-    if r.status_code not in (200, 302):
-        fail(f"Unexpected renew status: {r.status_code}")
+# 6️⃣ 滚动 + 点击
+driver.execute_script(
+    "arguments[0].scrollIntoView({block:'center'});", renew_btn
+)
+time.sleep(1)
 
-    # 2️⃣ 再次访问 server 页面，验证状态
-    r2 = s.get(SERVER_URL, headers=HEADERS, timeout=15)
+try:
+    renew_btn.click()
+except:
+    driver.execute_script("arguments[0].click();", renew_btn)
 
-    if "sign-in" in r2.url:
-        fail("Lost login after renew")
+print("✅ Renew Server button clicked")
 
-    html = r2.text.lower()
 
-    # === 关键成功特征（可按你页面微调）===
-    success_keywords = [
-        "next billing",
-        "renewed",
-        "expires",
-        "valid until"
-    ]
+        # 7️⃣ 可选：确认续期
+        if "success" in driver.page_source.lower():
+            print("🎉 Renew success")
+        else:
+            print("⚠️ Renew maybe pending or requires confirmation")
 
-    if not any(k in html for k in success_keywords):
-        fail("Renew page loaded but no success indicators found")
+    finally:
+        driver.quit()
 
-    print("🎉 Zampto VPS renewed successfully")
+
+
 
 if __name__ == "__main__":
     main()
+
