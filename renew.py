@@ -1,3 +1,4 @@
+import os
 import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -11,6 +12,10 @@ from selenium.webdriver.support import expected_conditions as EC
 # ================= 配置区 =================
 USERNAME = os.getenv("ZAMPTO_EMAIL")
 PASSWORD = os.getenv("ZAMPTO_PASSWORD")
+
+if not USERNAME or not PASSWORD:
+    raise RuntimeError("❌ 未检测到 ZAMPTO_USER / ZAMPTO_PASS 环境变量")
+
 SERVER_ID = "2190"
 
 LOGIN_URL = "https://auth.zampto.net/sign-in?app_id=bmhk6c8qdqxphlyscztgl"
@@ -97,6 +102,7 @@ def run_task():
 
 if __name__ == "__main__":
     run_task()
+
 
 
 
