@@ -9,8 +9,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 # ================= 配置区 =================
-USERNAME = ""
-PASSWORD = ""
+USERNAME = os.getenv("ZAMPTO_EMAIL")
+PASSWORD = os.getenv("ZAMPTO_PASSWORD")
 SERVER_ID = "2190"
 
 LOGIN_URL = "https://auth.zampto.net/sign-in?app_id=bmhk6c8qdqxphlyscztgl"
@@ -97,6 +97,7 @@ def run_task():
 
 if __name__ == "__main__":
     run_task()
+
 
 
 
