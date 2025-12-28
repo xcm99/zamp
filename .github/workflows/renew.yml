@@ -23,7 +23,7 @@ jobs:
       - name: Renew Zampto VPS
         env:
           ZAMPTO_PHPSESSID: ${{ secrets.ZAMPTO_PHPSESSID }}
-          ZAMPTO_SERVER_ID: "2711"
+          ZAMPTO_SERVER_ID: "2186"
 
           # Telegram
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
