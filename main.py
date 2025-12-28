@@ -19,8 +19,8 @@ class ZamptoLogin:
         """初始化，从环境变量读取配置"""
         self.url = os.getenv('ZAMPTO_URL', 'https://hosting.zampto.net')
         self.server_urls = os.getenv('ZAMPTO_SERVER_URLS', '')
-        self.auth_url = os.getenv('ZAMPTO_AUTH_URL', 'https://hosting.zampto.net/auth')
-        self.accounts_url = os.getenv('ZAMPTO_ACCOUNTS_URL', 'https://accounts.zampto.net/auth')
+        self.auth_url = os.getenv('ZAMPTO_AUTH_URL', 'https://auth.zampto.net/sign-in?app_id=bmhk6c8qdqxphlyscztgl')
+        self.accounts_url = os.getenv('ZAMPTO_ACCOUNTS_URL', 'https://auth.zampto.net/sign-in/password?app_id=bmhk6c8qdqxphlyscztgl')
         
         # 获取认证信息
         self.email = os.getenv('ZAMPTO_EMAIL', '')
