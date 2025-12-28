@@ -1,39 +1,31 @@
-name: Zampto Auto Renew (Pro)
+name: Zampto Auto Renew
 
 on:
   schedule:
-    - cron: "0 0 * * *"   # 每天 UTC 00:00（北京时间 08:00）
-  workflow_dispatch:
+    # 时间依然是 UTC 0:00 (北京时间 8:00)
+    - cron: '0 0 */6 * *'
+  workflow_dispatch: # 允许手动触发
 
 jobs:
-  renew:
+  renew_job:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
 
-      - name: Install deps
-        run: |
-          pip install -r requirements.txt
+    - name: Install Dependencies
+      run: |
+        pip install selenium webdriver-manager
 
-      - name: Renew Zampto VPS
-        env:
-          ZAMPTO_PHPSESSID: ${{ secrets.ZAMPTO_PHPSESSID }}
-          ZAMPTO_SERVER_ID: "2186"
-
-          # Telegram
-          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
-          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
-
-          # Email
-          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
-          SMTP_PORT: "587"
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASS: ${{ secrets.SMTP_PASS }}
-          MAIL_TO: ${{ secrets.MAIL_TO }}
-        run: |
-          python renew.py
+    - name: Run Renewal Script
+      env:
+        # 即使你的 Python 脚本里写死了密码，保留这部分配置也不会报错，放心使用
+        ZAMPTO_EMAIL: ${{ secrets.ZAMPTO_EMAIL }}
+        ZAMPTO_PASSWORD: ${{ secrets.ZAMPTO_PASSWORD }}
+      run: python renew.py
