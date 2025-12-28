@@ -2,8 +2,7 @@ name: Zampto Auto Renew
 
 on:
   schedule:
-    # 时间依然是 UTC 0:00 (北京时间 8:00)
-    - cron: '0 0 */6 * *'
+    - cron: "0 0 * * *"   # 每天 UTC 00:00（北京时间 08:00）
   workflow_dispatch: # 允许手动触发
 
 jobs:
@@ -28,4 +27,6 @@ jobs:
         # 即使你的 Python 脚本里写死了密码，保留这部分配置也不会报错，放心使用
         ZAMPTO_EMAIL: ${{ secrets.ZAMPTO_EMAIL }}
         ZAMPTO_PASSWORD: ${{ secrets.ZAMPTO_PASSWORD }}
+        TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+        TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
       run: python renew.py
