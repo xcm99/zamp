@@ -1,0 +1,39 @@
+name: Zampto Auto Renew (Pro)
+
+on:
+  schedule:
+    - cron: "0 0 * * *"   # 每天 UTC 00:00（北京时间 08:00）
+  workflow_dispatch:
+
+jobs:
+  renew:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          pip install -r requirements.txt
+
+      - name: Renew Zampto VPS
+        env:
+          ZAMPTO_PHPSESSID: ${{ secrets.ZAMPTO_PHPSESSID }}
+          ZAMPTO_SERVER_ID: "2711"
+
+          # Telegram
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+
+          # Email
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: "587"
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+        run: |
+          python renew.py
