@@ -1,69 +1,96 @@
-import os
-import requests
-from notify import telegram_notify, email_notify
+import time
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-PHPSESSID = os.getenv("ZAMPTO_PHPSESSID")
-SERVER_ID = os.getenv("ZAMPTO_SERVER_ID")
+# ================= 配置区 =================
+USERNAME = "moyz8800@outlook.com"
+PASSWORD = "mkDz66880"
+SERVER_ID = "2190"
 
-if not PHPSESSID or not SERVER_ID:
-    raise RuntimeError("Missing PHPSESSID or SERVER_ID")
+LOGIN_URL = "https://auth.zampto.net/sign-in?app_id=bmhk6c8qdqxphlyscztgl"
+DASH_URL = f"https://dash.zampto.net/server?id={SERVER_ID}"
+RENEW_URL = f"https://dash.zampto.net/server?id={SERVER_ID}&renew=true"
+# =========================================
 
-BASE_URL = "https://dash.zampto.net"
-SERVER_URL = f"{BASE_URL}/server?id={SERVER_ID}"
-RENEW_URL = f"{SERVER_URL}&renew=true"
+def run_task():
+    print("🚀 启动 Zampto 自动续期流程 (v7 源码精准版)...")
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-    "Referer": SERVER_URL,
-}
+    # --- 浏览器配置 ---
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
 
-def fail(msg: str):
-    telegram_notify(f"❌ <b>Zampto Renew Failed</b>\n{msg}")
-    email_notify("Zampto Renew Failed", msg)
-    raise RuntimeError(msg)
+    driver = webdriver.Chrome(options=chrome_options)
+    wait = WebDriverWait(driver, 20)
 
-def main():
-    print("🚀 Zampto renew start (requests-only)")
+    try:
+        # === 步骤 1: 输入账号 ===
+        print(f"Testing Login URL: {LOGIN_URL}")
+        driver.get(LOGIN_URL)
+        
+        print("1️⃣  精准锁定【用户名】输入框 (name='identifier')...")
+        # 依据: name="identifier"
+        email_input = wait.until(EC.visibility_of_element_located((By.NAME, "identifier")))
+        email_input.clear()
+        email_input.send_keys(USERNAME)
 
-    s = requests.Session()
-    s.cookies.set("PHPSESSID", PHPSESSID, domain=".zampto.net", path="/")
+        print("   点击【登录】按钮 (name='submit')...")
+        # 依据: name="submit"
+        driver.find_element(By.NAME, "submit").click()
 
-        # 4️⃣ 打开 VPS 管理页
-        driver.get(VPS_MANAGE_URL)
+        # === 步骤 2: 输入密码 ===
+        print("2️⃣  精准锁定【密码】输入框 (name='password')...")
+        # 依据: <input name="password" ...>
+        password_input = wait.until(EC.visibility_of_element_located((By.NAME, "password")))
+        password_input.clear()
+        password_input.send_keys(PASSWORD)
 
-        # 5️⃣ 定位 Renew Server 按钮
-renew_btn = wait.until(
-    EC.presence_of_element_located(
-        (By.XPATH, "//a[contains(@onclick,'handleServerRenewal')]")
-    )
-)
+        print("   点击【继续】按钮 (name='submit')...")
+        # 依据: <button name="submit" ...>
+        submit_btn = driver.find_element(By.NAME, "submit")
+        driver.execute_script("arguments[0].click();", submit_btn)
 
-# 6️⃣ 滚动 + 点击
-driver.execute_script(
-    "arguments[0].scrollIntoView({block:'center'});", renew_btn
-)
-time.sleep(1)
+        # === 步骤 3: 提取 Cookie ===
+        print("3️⃣  等待登录跳转...")
+        wait.until(EC.url_contains("dash.zampto.net"))
+        print("   ✅ 登录成功，跳转至控制台...")
 
-try:
-    renew_btn.click()
-except:
-    driver.execute_script("arguments[0].click();", renew_btn)
+        driver.get(DASH_URL)
+        time.sleep(2)
 
-print("✅ Renew Server button clicked")
-
-
-        # 7️⃣ 可选：确认续期
-        if "success" in driver.page_source.lower():
-            print("🎉 Renew success")
+        # 提取 Session
+        cookies = driver.get_cookies()
+        phpsessid_value = next((c['value'] for c in cookies if c['name'] == 'PHPSESSID'), None)
+        if phpsessid_value:
+            print(f"   🔑 PHPSESSID: {phpsessid_value}")
+        
+        # === 步骤 4: 续期 ===
+        print(f"4️⃣  执行续期请求: {RENEW_URL}")
+        driver.get(RENEW_URL)
+        time.sleep(5)
+        
+        # 结果判断
+        if "login" in driver.current_url:
+            print("❌ 失败: 掉线了，被重定向回登录页")
+            exit(1)
         else:
-            print("⚠️ Renew maybe pending or requires confirmation")
+             print("🎉 续期脚本执行完毕。")
+             print(f"   最终 URL: {driver.current_url}")
+
+    except Exception as e:
+        print("\n❌❌❌ 发生错误 ❌❌❌")
+        print(f"错误信息: {e}")
+        exit(1)
 
     finally:
         driver.quit()
 
-
-
-
 if __name__ == "__main__":
-    main()
-
+    run_task()
