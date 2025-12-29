@@ -14,7 +14,7 @@ USERNAME = os.getenv("ZAMPTO_EMAIL")
 PASSWORD = os.getenv("ZAMPTO_PASSWORD")
 
 if not USERNAME or not PASSWORD:
-    raise RuntimeError("❌ 未检测到 ZAMPTO_USER / ZAMPTO_PASS 环境变量")
+    raise RuntimeError("❌ 未检测到 ZAMPTO_EMAIL / ZAMPTO_PASSWORD 环境变量")
 
 SERVER_ID = "2190"
 
@@ -102,6 +102,7 @@ def run_task():
 
 if __name__ == "__main__":
     run_task()
+
 
 
 
