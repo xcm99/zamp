@@ -27,6 +27,13 @@ def send_telegram(msg: str):
         timeout=10
     )
 
+def mask_email(email: str) -> str:
+    """
+    只显示邮箱前三位，其余用 *** 代替
+    例：abc123@gmail.com -> abc***
+    """
+    return email[:3] + "***"
+
 # ================= Zampto =================
 LOGIN_URL = "https://auth.zampto.net/sign-in?app_id=bmhk6c8qdqxphlyscztgl"
 
@@ -115,15 +122,16 @@ def main():
     # === Telegram 汇总 ===
     msg = "📦 <b>Zampto 多账号 VPS 续期结果</b>\n\n"
 
-    if success:
-        msg += "✅ <b>成功</b>\n"
-        for email, sid in success:
-            msg += f"• {email} → VPS {sid}\n"
+if success:
+    msg += "✅ <b>成功</b>\n"
+    for email, _ in success:
+        msg += f"• {mask_email(email)}\n"
 
-    if failed:
-        msg += "\n❌ <b>失败</b>\n"
-        for email, sid in failed:
-            msg += f"• {email} → VPS {sid}\n"
+if failed:
+    msg += "\n❌ <b>失败</b>\n"
+    for email, _ in failed:
+        msg += f"• {mask_email(email)}\n"
+
 
     send_telegram(msg)
 
