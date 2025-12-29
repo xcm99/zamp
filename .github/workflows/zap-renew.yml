@@ -1,0 +1,32 @@
+name: Zap续期
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'   # 每天 UTC 00:00（北京时间 08:00）
+
+jobs:
+  renew:
+    runs-on: ubuntu-latest
+
+    env:
+      ZAMPTO_ACCOUNTS: ${{ secrets.ZAMPTO_ACCOUNTS }}
+      TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+      TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install selenium requests
+
+      - name: Run Zap Renew Script
+        run: |
+          python zaprenew.py
