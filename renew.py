@@ -7,6 +7,24 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
+import requests
+
+TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
+TG_CHAT_ID = os.getenv("TG_CHAT_ID")
+
+def send_telegram(msg: str):
+    if not TG_BOT_TOKEN or not TG_CHAT_ID:
+        print("⚠️ 未配置 Telegram 环境变量，跳过通知")
+        return
+
+    url = f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage"
+    data = {
+        "chat_id": TG_CHAT_ID,
+        "text": msg,
+        "parse_mode": "HTML"
+    }
+    requests.post(url, data=data, timeout=10)
+
 
 
 # ================= 配置区 =================
@@ -92,9 +110,20 @@ def run_task():
              print("🎉 续期脚本执行完毕。")
              print(f"   最终 URL: {driver.current_url}")
 
+             send_telegram(
+                 "🎉 <b>Zampto VPS 续期成功</b>\n"
+                 f"最终 URL：{driver.current_url}"
+            )
+
+
     except Exception as e:
         print("\n❌❌❌ 发生错误 ❌❌❌")
         print(f"错误信息: {e}")
+        
+        send_telegram(
+            "❌ <b>Zampto VPS 续期失败</b>\n"
+            f"<pre>{e}</pre>"
+        )
         exit(1)
 
     finally:
@@ -102,6 +131,7 @@ def run_task():
 
 if __name__ == "__main__":
     run_task()
+
 
 
 
