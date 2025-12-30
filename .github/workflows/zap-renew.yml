@@ -8,6 +8,8 @@ on:
 jobs:
   renew:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     env:
       ZAMPTO_ACCOUNTS: ${{ secrets.ZAMPTO_ACCOUNTS }}
@@ -26,7 +28,18 @@ jobs:
       - name: Install dependencies
         run: |
           pip install selenium requests
+          
 
       - name: Run Zap Renew Script
         run: |
           python zaprenew.py
+      
+      - name: Commit heartbeat time.txt
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add time.txt
+          git commit -m "chore: update heartbeat time" || echo "No changes to commit"
+          git push
