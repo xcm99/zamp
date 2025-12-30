@@ -7,6 +7,16 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+from datetime import datetime, timezone
+
+def write_heartbeat():
+    """
+    写入运行心跳文件，用于 GitHub Actions 保活
+    """
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    with open("time.txt", "w", encoding="utf-8") as f:
+        f.write(f"Last run: {now}\n")
+
 # ================= Telegram =================
 TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
 TG_CHAT_ID = os.getenv("TG_CHAT_ID")
@@ -56,7 +66,8 @@ def renew_single_account(account):
     password = account["password"]
     server_id = account["server_id"]
 
-    print(f"\n👤 账号: {email} | VPS: {server_id}")
+    masked = mask_email(email)
+    print(f"\n👤 账号: {masked}")
 
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -98,11 +109,11 @@ def renew_single_account(account):
         if "login" in driver.current_url:
             raise RuntimeError("登录态丢失，续期失败")
 
-        print(f"✅ 成功：{email} VPS {server_id}")
+        print(f"✅ 成功：{masked}")
         return True, email, server_id
 
     except Exception as e:
-        print(f"❌ 失败：{email} VPS {server_id} | {e}")
+        print(f"❌ 失败：{masked} | {e}")
         return False, email, server_id
 
     finally:
@@ -134,6 +145,7 @@ def main():
 
 
     send_telegram(msg)
+    write_heartbeat()
 
 if __name__ == "__main__":
     main()
