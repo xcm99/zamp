@@ -122,15 +122,15 @@ def main():
     # === Telegram 汇总 ===
     msg = "📦 <b>Zampto 多账号 VPS 续期结果</b>\n\n"
 
-if success:
-    msg += "✅ <b>成功</b>\n"
-    for email, _ in success:
-        msg += f"• {mask_email(email)}\n"
+    if success:
+        msg += "✅ <b>成功</b>\n"
+        for email, _ in success:
+            msg += f"• {mask_email(email)}\n"
 
-if failed:
-    msg += "\n❌ <b>失败</b>\n"
-    for email, _ in failed:
-        msg += f"• {mask_email(email)}\n"
+    if failed:
+        msg += "\n❌ <b>失败</b>\n"
+        for email, _ in failed:
+            msg += f"• {mask_email(email)}\n"
 
 
     send_telegram(msg)
