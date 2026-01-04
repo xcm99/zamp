@@ -36,6 +36,24 @@ def send_telegram(msg: str):
         },
         timeout=10
     )
+#增加截图
+def send_telegram_photo(photo_path: str, caption: str = ""):
+    if not TG_BOT_TOKEN or not TG_CHAT_ID:
+        print("⚠️ Telegram 未配置，跳过图片通知")
+        return
+
+    url = f"https://api.telegram.org/bot{TG_BOT_TOKEN}/sendPhoto"
+    with open(photo_path, "rb") as f:
+        requests.post(
+            url,
+            data={
+                "chat_id": TG_CHAT_ID,
+                "caption": caption,
+                "parse_mode": "HTML",
+            },
+            files={"photo": f},
+            timeout=20,
+        )
 
 def mask_email(email: str) -> str:
     """
@@ -101,6 +119,9 @@ def renew_single_account(account):
 
         wait.until(EC.url_contains("dash.zampto.net"))
 
+        masked = mask_email(email)
+        screenshot_path = f"screenshot_{masked}.png"
+
         # === 续期 ===
         renew_url = f"https://dash.zampto.net/server?id={server_id}&renew=true"
         driver.get(renew_url)
@@ -109,11 +130,25 @@ def renew_single_account(account):
         if "login" in driver.current_url:
             raise RuntimeError("登录态丢失，续期失败")
 
+        driver.save_screenshot(screenshot_path)
+
         print(f"✅ 成功：{masked}")
+
+        send_telegram_photo(
+        screenshot_path,
+        caption=f"✅ <b>续期完成</b>\n账号：{masked}"
+        )
+
         return True, email, server_id
 
     except Exception as e:
-        print(f"❌ 失败：{masked} | {e}")
+        driver.save_screenshot(screenshot_path)
+
+        send_telegram_photo(
+        screenshot_path,
+        caption=f"❌ <b>续期失败</b>\n账号：{masked}"
+        )
+
         return False, email, server_id
 
     finally:
